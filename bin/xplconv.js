@@ -110,7 +110,7 @@ function preprocessor(loadFrom, saveTo) {
 			//@leave
 
 			function head() {
-				return 'var ' + varName + ' = function(){ var Explain = require(\'./explain.js\').Explain; var e = new Explain(); return e; }();'
+				return 'var ' + varName + ' = function(){ var Explain = require(\'explain\').Explain; var e = new Explain(); return e; }();'
 			}
 		}
 
