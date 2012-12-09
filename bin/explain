@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
 
 var loadFrom = process.argv[2];
@@ -11,7 +13,7 @@ if (!loadFrom) {
 }
 
 function showUsage() {
-	console.log('node.exe xplconv.js input [output]');
+	console.log('explain input [output]');
 }
 
 function preprocessor(loadFrom, saveTo) {
@@ -94,12 +96,31 @@ function preprocessor(loadFrom, saveTo) {
 
 		function replacePrintLn() {
 			//@enter
-			//> 替换所有的 //> ... 为 printLn(...)
+			//> 替换所有的 //> ... 为 printLn(...) 并正确的处理字符串转义问题
 			after = after.replace(printLnPattern, replaceCallback);
 			//@leave
 
 			function replaceCallback(g0, g1, g2) {
-				return g1 + varName + '.printLn(\'' + g2 + '\');';
+				g2 = strEscape(g2.trim());
+				return g1 + varName + '.printLn(\'' + g2.trim() + '\');';
+
+				function strEscape(input) {
+					if (!input) return input;
+					var output = "";
+					for (var i = 0, len = input.length; i < len; ++i) {
+						var c = input[i];
+						switch (c) {
+							case '\\':
+								c = '\\\\';
+								break;
+							case '\'':
+								c = '\\\'';
+								break;
+						}
+						output += c;
+					}
+					return output;
+				}
 			}
 		}
 

@@ -1,0 +1,14 @@
+{
+	"name": "explain",
+	"description": "logic explain engine",
+	"version": "v1.0.0",
+	"engines": "v0.8.14",
+	"author": {
+		"name": "Jianru Lin",
+		"email": "jianru.lin@gmail.com"
+	},
+	"main": "explain.js",
+	"directories": {
+		"bin": "./bin"
+	}
+}

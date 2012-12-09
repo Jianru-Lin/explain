@@ -60,12 +60,20 @@ function showLog() {
 	var stack = this.stack;
 	var root = stack[0];
 	if (!root) return;
-	show(0, root);
+
+	for (var i = 0, c = 1; i < root.flow.length; ++i) {
+		var item = root.flow[i];
+		if (typeof item === 'string') {
+			console.log('%s%d. %s', s, c++, item);
+		} else {
+			show(0, item);
+		}
+	}
 
 	function show(level, target) {
 		if (!target) return;
 		var s = space(level);
-		console.log('%s[%s]', s, target.name);
+		console.log('%s[%s]', s, target.name || '#anonymous');
 		for (var i = 0, c = 1; i < target.flow.length; ++i) {
 			var item = target.flow[i];
 			if (typeof item === 'string') {
