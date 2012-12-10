@@ -64,7 +64,7 @@ function showLog() {
 	for (var i = 0, c = 1; i < root.flow.length; ++i) {
 		var item = root.flow[i];
 		if (typeof item === 'string') {
-			console.log('%s%d. %s', s, c++, item);
+			console.log('%d. %s', c++, item);
 		} else {
 			show(0, item);
 		}
