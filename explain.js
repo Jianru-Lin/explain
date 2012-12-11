@@ -6,11 +6,13 @@ function Explain() {
 	
 	this.stack = [];
 	this.stackBroken = false;
+	this.current = null;
 
 	this.enter = enter;
 	this.leave = leave;
 	this.printLn = printLn;
 	this.showLog = showLog;
+	this.proxy = proxy;
 
 	this.stack.push({
 		name: '$explain$',
@@ -19,24 +21,30 @@ function Explain() {
 }
 
 function enter() {
-	//console.log('enter %s', name);
 	var stack = this.stack;
 	var current = {
 		name: enter.caller.name,
 		flow: []
 	};
+
 	stack.push(current);
 
-	var parent = stack[stack.length-2];
+	var parent = this.current || stack[stack.length-2];
 	if (parent) {
 		parent.flow.push(current);
 	}
+
+	this.current = current;
+	return current;
 }
 
 function leave() {
+	var stack, current;
+
 	if (this.stackBroken) return;
-	var stack = this.stack;
-	var current = stack.pop();
+	this.current = null;
+	stack = this.stack;
+	current = stack.pop();
 	if (current) {
 		if (current.name !== leave.caller.name) {
 			stackBroken = true;
@@ -54,6 +62,38 @@ function printLn(line) {
 	var current = stack[stack.length-1];
 	if (!current) return;
 	current.flow.push(line);
+}
+
+function proxy(callback) {
+	debugger;
+	// [变量]
+	var self, reserved;
+
+	// [流程]
+	self = this;
+	reserved = {
+		name: '$reserved$',
+		flow: []
+	};
+	this.current.flow.push(reserved); 
+	return callbackProxy;
+
+	// [函数]
+	function callbackProxy() {
+		debugger;
+		// [变量]
+		var oldCurrent, result;
+
+		// [流程]
+		oldCurrent = self.current;
+		self.current = reserved;
+		try {
+			result = callback(); // 这里没有考虑参数传递和函数的绑定问题，需要改进
+			return result;
+		} finally {
+			self.current = oldCurrent;
+		}
+	}
 }
 
 function showLog() {

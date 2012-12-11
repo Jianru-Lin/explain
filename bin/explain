@@ -54,6 +54,7 @@ function preprocessor(loadFrom, saveTo) {
 		var varName = 'e7b4_xpl',
 			enterPattern = new RegExp('^(\\s*)//@enter', 'gm'),
 			leavePattern = new RegExp('^(\\s*)//@leave', 'gm'),
+			proxyPattern = new RegExp('/\\*{\\*/([^\\*]*)/\\*}\\*/', 'g');
 			printLnPattern = new RegExp('^(\\s*)//>(.*)', 'gm');
 
 		// [流程]
@@ -65,6 +66,7 @@ function preprocessor(loadFrom, saveTo) {
 		after = before;
 		replaceEnter();
 		replaceLeave();
+		replaceProxy();
 		replacePrintLn();
 		prependHead();
 		appendFoot();
@@ -91,6 +93,17 @@ function preprocessor(loadFrom, saveTo) {
 
 			function replaceCallback(g0, g1) {
 				return g1 + '} finally { ' + varName + '.leave(); }';
+			}
+		}
+
+		function replaceProxy() {
+			//@enter
+			//> 替换所有的 /*{*/.../*}*/ 为 xpl.proxy(...)
+			after = after.replace(proxyPattern, replaceCallback);
+			//@leave
+
+			function replaceCallback(g0, g1) {
+				return varName + '.proxy(' + g1 + ')';
 			}
 		}
 
