@@ -1,7 +1,7 @@
 {
 	"name": "explain",
 	"description": "logic explain engine",
-	"version": "v1.0.0",
+	"version": "v2.1.0",
 	"engines": "v0.8.14",
 	"author": {
 		"name": "Jianru Lin",
