@@ -1,5 +1,6 @@
 // [导出]
 exports.Explain = Explain;
+exports.g = new Explain();
 
 // [函数]
 function Explain() {
@@ -65,7 +66,6 @@ function printLn(line) {
 }
 
 function proxy(callback) {
-	debugger;
 	// [变量]
 	var self, reserved;
 
@@ -88,7 +88,7 @@ function proxy(callback) {
 		oldCurrent = self.current;
 		self.current = reserved;
 		try {
-			result = callback(); // 这里没有考虑参数传递和函数的绑定问题，需要改进
+			result = callback.apply(this, arguments);
 			return result;
 		} finally {
 			self.current = oldCurrent;

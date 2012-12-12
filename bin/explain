@@ -55,7 +55,8 @@ function preprocessor(loadFrom, saveTo) {
 			enterPattern = new RegExp('^(\\s*)//@enter', 'gm'),
 			leavePattern = new RegExp('^(\\s*)//@leave', 'gm'),
 			proxyPattern = new RegExp('/\\*{\\*/([^\\*]*)/\\*}\\*/', 'g');
-			printLnPattern = new RegExp('^(\\s*)//>(.*)', 'gm');
+			printLnPattern = new RegExp('^(\\s*)//>(.*)', 'gm'),
+			outputPattern = new RegExp('^(\\s*)//@output', 'gm');
 
 		// [流程]
 		//@enter
@@ -64,58 +65,58 @@ function preprocessor(loadFrom, saveTo) {
 			return false;
 		}
 		after = before;
+		replacePrintLn();
 		replaceEnter();
 		replaceLeave();
+		replaceOutput();
 		replaceProxy();
-		replacePrintLn();
 		prependHead();
-		appendFoot();
 		return true;
 		//@leave
 
 		// [函数]
 		function replaceEnter() {
 			//@enter
-			//> 替换所有的 //@enter 为 xpl.enter(); try {
+			//> 替换所有的 //@enter 为 e7b4_xpl.g.enter(); try {
 			after = after.replace(enterPattern, replaceCallback);
 			//@leave
 
 			function replaceCallback(g0, g1) {
-				return g1 + varName + '.enter(); try {';
+				return g1 + varName + '.g.enter(); try {';
 			}
 		}
 
 		function replaceLeave() {
 			//@enter
-			//> 替换所有的 //@leave 为 } finally { leave(); }
+			//> 替换所有的 //@leave 为 } finally { e7b4_xpl.g.leave(); }
 			after = after.replace(leavePattern, replaceCallback);
 			//@leave
 
 			function replaceCallback(g0, g1) {
-				return g1 + '} finally { ' + varName + '.leave(); }';
+				return g1 + '} finally { ' + varName + '.g.leave(); }';
 			}
 		}
 
 		function replaceProxy() {
 			//@enter
-			//> 替换所有的 /*{*/.../*}*/ 为 xpl.proxy(...)
+			//> 替换所有的 /*{*/.../*}*/ 为 e7b4_xpl.g.proxy(...)
 			after = after.replace(proxyPattern, replaceCallback);
 			//@leave
 
 			function replaceCallback(g0, g1) {
-				return varName + '.proxy(' + g1 + ')';
+				return varName + '.g.proxy(' + g1 + ')';
 			}
 		}
 
 		function replacePrintLn() {
 			//@enter
-			//> 替换所有的 //> ... 为 printLn(...) 并正确的处理字符串转义问题
+			//> 替换所有的 //> ... 为 e7b4_xpl.g.printLn(...) 并正确的处理字符串转义问题
 			after = after.replace(printLnPattern, replaceCallback);
 			//@leave
 
 			function replaceCallback(g0, g1, g2) {
 				g2 = strEscape(g2.trim());
-				return g1 + varName + '.printLn(\'' + g2.trim() + '\');';
+				return g1 + varName + '.g.printLn(\'' + g2.trim() + '\');';
 
 				function strEscape(input) {
 					if (!input) return input;
@@ -137,6 +138,17 @@ function preprocessor(loadFrom, saveTo) {
 			}
 		}
 
+		function replaceOutput() {
+			//@enter
+			//> 替换所有的 //@output 为 e7b4_xpl.g.showLog();
+			after = after.replace(outputPattern, replaceCallback);
+			//@leave
+
+			function replaceCallback(g0, g1) {
+				return g1 + varName + '.g.showLog();';
+			}
+		}
+
 		function prependHead() {
 			//@enter
 			//> 添加 Head
@@ -144,15 +156,8 @@ function preprocessor(loadFrom, saveTo) {
 			//@leave
 
 			function head() {
-				return 'var ' + varName + ' = function(){ var Explain = require(\'explain\').Explain; var e = new Explain(); return e; }();'
+				return 'var ' + varName + ' = require(\'explain\');'
 			}
-		}
-
-		function appendFoot() {
-			//@enter
-			//> 添加 Foot
-			after = after + '\r\n' + varName + '.showLog()';
-			//@leave
 		}
 	}
 
